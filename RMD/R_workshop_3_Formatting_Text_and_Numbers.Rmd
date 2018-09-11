@@ -1,0 +1,178 @@
+---
+title: "3.Formatting Text and Numbers"
+date: "`r Sys.Date()`"
+output:
+  rmdformats::html_docco:
+    highlight: kate
+---
+
+
+```{r knitr_init, echo=FALSE, cache=FALSE}
+library(knitr)
+library(rmdformats)
+library(magrittr)
+
+## Global options
+options(max.print="75")
+opts_chunk$set(echo=TRUE,
+               cache=TRUE,
+               prompt=FALSE,
+               tidy=TRUE,
+               comment=NA,
+               message=FALSE,
+               warning=FALSE)
+opts_knit$set(width=75)
+```
+
+`r Sys.Date()` edited
+
+noted by @kemushi54
+
+<br>
+
+先來mur一下本章大概在幹嘛~
+標題翻譯是格式化字詞和數字，也就是如何在螢幕上顯示字串或輸出到檔案之中，然後看起來美美的。
+
+<br>
+
+#打印和格式化字串用的函式
+
+|Function   |Description         |
+|:--------|:-----------|
+|`print()` |generic printing    |   
+|`noquote()` |print with no quotes| 
+|`cat()` |concatenation       |   
+|`format()` |special formats     |
+|`toString()` |convert to string   |
+|`sprintf()` |C-style printing    |
+<br>
+
+#`print()`  generic printing (一般打印)
+```{r print}
+my_string <- "programming with data is fun"
+
+print(my_string)
+```
+
+##`print(quote = FALSE)`same as `noquote()`
+```{r print and noqute}
+print(my_string, quote = FALSE)
+```
+
+##`print()`使用時機
+一般時刻只要打物件名稱就可以打印了，並需要用到`print()`，主要是在跑loop時，在大括弧`{}`(braces)內要打印時用到，如下兩個範例的差異。
+
+```{r print in loop}
+for (i in 1:5) {
+  i + 1
+}
+
+for (i in 1:5) {
+  print(i + 1)
+}
+```
+<br>
+
+
+#`cat()`	concatenation
+主要有以下的引數可以用，`file`給路徑可用來輸出文字檔 (*.txt)
+
+`sep`設定字串間的分隔符號
+```{r sep}
+# cat(..., file = "", sep = " ", fill = FALSE, labels = NULL, append = FALSE)
+
+# argument sep
+cat(1:10, sep = "-")
+```
+
+`fill`設定一行容納多長的字串
+```{r fill}
+# argument fill
+# fill = 39
+cat("Loooooooooong strings", # nchar = 21
+    "can be displayed", # nchar = 16
+    "in a nice format", # nchar = 16
+    "by using the 'fill' argument", # nchar = 28
+    fill = 39)
+```
+
+## 輸出文字檔的方法`cat()`、`sink()`
+`cat()`不能輸出class為data.frame的物件，僅能打印為vector。
+`sink()`比較彈性，操作上類似開關，起頭給輸出路徑，結尾關起來儲存。
+```{r cat v.s. sink}
+# ## Not run:
+# # save as .txt 
+# # \n: next line, \t: tab, \: 
+# dfr <- data.frame(a = 1, b = 2, c = 3)
+# 
+# sink(file.path("./", 'nbmodels.txt'))
+# cat('================================================\n')
+# # cat(paste0(names(list_of_models)[[j]], '\n'))
+# cat('================================================\n')
+# print(dfr)
+# sink()
+# ## End(Not run)
+```
+
+## 小數點下要幾位數
+要注意會受`digits`影響，預設digits = 7，可以`option("digits")`查看。
+```{r nsmall}
+#-- format()	special formats
+# use of 'nsmall'
+format(13.12, nsmall = 3)
+```
+
+## 有效位數
+```{r digits}
+# use of 'digits' (有效位數)
+format(c(6.123, 13.456), digits = 3)
+```
+
+## 科學記數
+```{r scientific notation}
+# use of 'scientific'
+x <- exp(1:3)
+format(x, digits = 3)
+format(x, digits = 3, scientific = TRUE)
+```
+
+## 字串寬度和空白對齊
+```{r width and justify}
+# use of 'justify'
+format(c("A", "BB", "CCC"), width = 5, justify = "centre")
+```
+
+## 小數點左邊數字分位數表示
+相對的`small.mark`表示小數點右邊數字分位數
+```{r big.mark}
+# use of 'big.mark'
+format(123456789, big.mark = ",")
+```
+
+<br>
+<br>
+<br>
+
+# 以下`toString()`、`sprinf()`跑到下一章囉！建議先瀏覽或實測看看輸出結果
+```{r toString}
+#-- toString()	convert to string
+```
+
+```{r sprinf}
+#-- sprintf()	C-style printing
+# %s for character, %f for number
+item <- "the apple"
+weight <- 3.2
+sprintf("The weight of %s is %f kg.", item, weight)
+
+# for vector
+items <- c("the apple", "the banana")
+weights <- c(3.2, 2.5)
+sprintf("The weight of %s is %f kg.", items, weights)
+
+# %.1f, assing digits = 1
+sprintf("The weight of %s is %.1f kg.", items, weights)
+
+#.2e, use scientific notation and assing digits = 2
+sprintf("The weight of %s is %.2e kg.", items, weights)
+```
