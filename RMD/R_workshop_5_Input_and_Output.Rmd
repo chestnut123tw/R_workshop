@@ -1,0 +1,250 @@
+---
+title: "5. Input and Output"
+date: "2018-10-02"
+output:
+  rmdformats::html_docco:
+    highlight: kate
+---
+
+```{r knitr_init, echo=FALSE, cache=FALSE}
+library(knitr)
+library(rmdformats)
+library(magrittr)
+
+## Global options
+options(max.print="75")
+opts_chunk$set(echo=TRUE,
+               cache=TRUE,
+               prompt=FALSE,
+               tidy=TRUE,
+               comment=NA,
+               message=FALSE,
+               warning=FALSE)
+opts_knit$set(width=75)
+```
+
+`r Sys.Date()` edited
+
+noted by @kemushi54
+
+<br>
+
+# 5.1 輸出結果
+有時候要將結果輸出檔案，譬如data table輸出為*.txt文字檔，可藉由`write.table()`、`write.csv()`或`writexl::write_xlsx()`等等完成，本篇則介紹最基礎的方法輸出文字檔，目前我想到可以運用在輸出log檔(程式執行紀錄檔)。
+
+<br>
+
+## 5.1.1 Concatenating output 串聯
+
+```{r}
+# summary statistics of mpg
+mpg_min <- min(mtcars$mpg)
+mpg_max <- max(mtcars$mpg)
+mpg_med <- median(mtcars$mpg)
+mpg_avg <- mean(mtcars$mpg)
+mpg_sd <- sd(mtcars$mpg)
+```
+
+```{r}
+# 設定檔案路徑 (需要完整路徑)
+outfile <- "mpg-statistics.txt"
+
+# 輸入檔案中的第一行 (Title)
+cat("Miles per Gallon Statistics\n\n", file = outfile)
+
+# 接續的內容，第一行之外的內容記得要設定參數 append = TRUE 
+cat("Minimum:", mpg_min, "\n", file = outfile, append = TRUE)
+cat("Maximum:", mpg_max, "\n", file = outfile, append = TRUE)
+cat("Median :", mpg_med, "\n", file = outfile, append = TRUE)
+cat("Mean   :", mpg_avg, "\n", file = outfile, append = TRUE)
+cat("Std Dev:", mpg_sd, "\n", file = outfile, append = TRUE)
+
+# # check file 
+# shell.exec("mpg-statistics.txt")
+```
+
+```{r}
+# 搭配 sprintf() 調整輸出格式，統一小數點後兩位
+cat("Miles per Gallon Statistics\n\n", file = outfile)
+cat(sprintf('Minimum: %0.2f', mpg_min), "\n", file = outfile, append = TRUE)
+cat(sprintf('Maximum: %0.2f', mpg_max), "\n", file = outfile, append = TRUE)
+cat(sprintf('Median : %0.2f', mpg_med), "\n", file = outfile, append = TRUE)
+cat(sprintf('Mean   : %0.2f', mpg_avg), "\n", file = outfile, append = TRUE)
+cat(sprintf('Std Dev: %0.2f', mpg_sd), "\n", file = outfile, append = TRUE)
+
+# # check file
+# shell.exec("mpg-statistics.txt")
+```
+
+<br>
+
+## 5.1.2 Sinking output
+export R output as is displayed in the R console
+
+```{r}
+mtcars_summary <- summary(mtcars)
+
+  # writeLines()
+writeLines(mtcars_summary, con = "mtcars-summary.txt")
+
+  # sink()
+sink(file = "mtcars-summary2.txt")
+mtcars_summary
+sink()
+```
+
+<br>
+
+# 5.2 Exporting tables
+```{r}
+library(xtable)
+
+  # linear regression
+reg <- lm(mpg ~ disp, data = mtcars)
+
+  # create xtable and export it
+reg_table <- xtable(reg)
+
+  # print in LaTeX format
+print(reg_table, type = "latex", file = "reg-table.tex")
+
+  # print in html format
+print(reg_table, type = "html", file = "reg-table.html")
+```
+
+<br>
+
+# 5.1 補充 `tryCatch()`
+處理大量重複性的事務時，我們常會用 `for` loop 或 `lapply()` 來處理，但若R程式中某些地方發生錯誤，整個R程式就會停在出錯的地方。`tryCatch()`可以協助偵測錯誤並讓出錯程式碼下方其他的程式繼續執行。
+
+<br>
+
+## `lapply()` 結構 
+* `lapply(list, function)`
+
+<br>
+
+### `lapply()` 寫法 1
+```{r}
+lapply(1:3, 
+       function(x){
+         x + 1
+       }
+       )
+```
+
+<br>
+
+### `lapply()` 寫法 2
+```{r}
+sq.1 <- 
+  function(x){
+  x^2 + 1
+  }
+
+lapply(1:3,
+       function(x)
+         sq.1(x)
+       )
+```
+
+<br>
+
+## `tryCatch()` 結構
+```{r eval=FALSE}
+tryCatch({
+  result <- expr
+}, warning = function(w) {
+  ... # 警告處理
+}, error = function(e) {
+  ... # 錯誤處理
+}, finally {
+  ... # 最後一定要執行的指令或輸出
+}
+)
+```
+
+<br>
+
+## `lapply()` 加入`tryCatch()`
+```{r}
+lapply(1:3,
+       function(x)
+         tryCatch(
+           sq.1(x),
+           error = function(m){
+             message(m)
+           }
+         )
+       )
+```
+
+<br>
+
+### 創造個 error 來看看(?) 
+```{r}
+n.list <- list(1, 2, 3, "aa")
+n.list
+
+a <- 
+  lapply(n.list,
+         function(x)
+           tryCatch(sq.1(x),
+                    error = function(m){
+                      message(m)
+                      # message(paste0(m, "\n"))
+                      # message(sprintf("%s_%s", x, m))
+                    }
+           )
+  )
+```
+
+<br>
+
+### `for` loop 版本
+```{r}
+for (i in list(1, 2, 3, "aa")){
+  tryCatch({
+    sq.1(i)
+    }, error = function(m){
+      message(m)
+           }
+  )
+}
+```
+
+<br>
+
+## 使用 tryCatch() 搭配 cat() 跟 sink() 輸出 error 紀錄
+
+<br>
+
+###開啟 error 紀錄檔
+```{r}
+cat("error message\n\n", file = "error message.txt")
+### 執行 lapply()
+a <- 
+  lapply(n.list,
+         function(x)
+           tryCatch({
+             return(sq.1(x))
+           },
+           error = function(m){
+             # 儲存 error 的訊息
+             cat(sprintf("%s\n", x), 
+                 file = "error message.txt",
+                 append = TRUE)
+           }
+           )
+  )
+
+# tryCatch 也可以用來處理 warning message
+for (i in c(-1, 0, 1)){
+  tryCatch({sqrt(i)
+    print(sqrt(i))
+  }, warning = function(msg){
+    message(paste0(i, "_",msg,"\n"))
+  }
+  )
+}
+```
