@@ -1,0 +1,269 @@
+---
+title: "4. C-style Formatting"
+date: "`r Sys.Date()`"
+output:
+  rmdformats::html_docco:
+    highlight: kate
+---
+
+
+```{r knitr_init, echo=FALSE, cache=FALSE}
+library(knitr)
+library(rmdformats)
+library(magrittr)
+
+## Global options
+options(max.print="75")
+opts_chunk$set(echo=TRUE,
+               cache=TRUE,
+               prompt=FALSE,
+               tidy=TRUE,
+               comment=NA,
+               message=FALSE,
+               warning=FALSE)
+opts_knit$set(width=75)
+```
+
+`r Sys.Date()` edited
+
+noted by @kemushi54
+
+<br>
+
+# C-style format是啥？
+C-style Formating: formatting like in the C language
+function name in other language: printf (print formattinf)
+
+# When would you use `sprintf()`?
+  * exporting output to some file.
+  * printing output on console.
+  * forming new strings.
+
+```{r}
+sprintf("I woke up at %s:%s%s a.m.", 8, 0, 5)
+# %: as a slot, is a placeholder for a variable that will be formatted
+# s: for type of the original vector, and how it will be formatted
+
+hour <- 8
+mins1 <- 0
+mins2 <- 5
+sprintf("I woke up at %s:%s%s a.m.", hour, mins1, mins2)
+```
+
+<br>
+
+# 4.1 C-style formatting options
+* string: %s
+* interger: %d, %0xd
+* number: %f, %.xf
+* scientific notation: %e, %E, %g
+
+<br>
+
+## 4.1.1 Format Slot Syntax
+The full syntax for a format slot:
+
+* **%[parameter][flags][width][.precision][length]type**
+
+```{r}
+# parameter, n$ (%n$d)
+sprintf("%d, %d", 2, 1)
+sprintf("%2$d, %2$d, %1$d", 2, 1)
+```
+
+<br>
+```{r}
+# flags (+, -, ' ', 0, #)
+# "+" 代表顯示正負號
+# "-" 代表靠左對齊
+sprintf("%-d, -%d, %+d,  %d", 1, 2, 3, 4)
+sprintf(' "%d" ', 2)
+sprintf("'%d'", 2)
+
+sprintf("%g", 1.2340000)
+sprintf("%#g", 1.2340000)
+sprintf("%g", 1234)
+sprintf("%#g", 1234)
+```
+
+```{r}
+# width and precision 
+  # width: minimum number of characters to output
+    # does not cause truncation of oversized fields
+  # precision: maximum limit on the output
+  # interger
+sprintf("%*d", 5, 10)
+sprintf("%5d", 10)
+sprintf("%.5d", 10)
+sprintf("%05d", 10)
+  # number (default of precision = 6)
+sprintf("%*f", 5, 10)
+sprintf("%5f", 10)
+sprintf("%.2f", 10)
+sprintf("%05.2f", 10)
+sprintf("%08.2f", 10)
+sprintf("%8.2f", 10)
+```
+
+```{r}
+  # character
+sprintf("%.*s", 3, "abcdef")
+sprintf("%*s", 3, "abcdef")
+```
+
+```{r}
+# length ??? 課本沒寫到
+
+# type 見課本
+```
+
+<br>
+
+## 4.1.2 Example: basic `sprintf()`
+```{r}
+sprintf("%s", 1/6)
+sprintf("%f", 1/6)
+sprintf("%.3f", 1/6)
+sprintf("%e", 1/6)
+sprintf("%.2e", 1/6)
+sprintf("%g", 1/6)
+```
+
+<br>
+
+## 4.1.3 Example: File Names
+```{r}
+paste0("data", 1:10, ".csv")
+sprintf("data%02d.csv", 1:10)
+```
+
+<br>
+
+## 4.1.4 Example: Fahrenheit to Celsius
+```{r}
+# function to_celsius()
+to_celsius <- 
+  function(temp = 1) {
+    (temp - 32) * 5/9
+}
+
+to_celsius(95)
+
+fahrenheit2celsius <- function(temp = 1) {
+  celsius <- to_celsius(temp)
+  sprintf('%.2f Fahrenheit degrees = %.2f Celsius degrees', temp, celsius)
+}
+
+fahrenheit2celsius(95)
+```
+
+<br>
+
+## 4.1.5 Example: Car Traveled Distance
+* creat S3 class object
+* https://www.cyclismo.org/tutorial/R/s3Classes.html
+* http://map-testing.blogspot.com/2016/09/r-s3s4.html
+
+```{r}
+mazda3 <- list(
+  name = 'mazda3', # car name
+  make = 'mazda',  # car make
+  year = 2015,     # year model
+  city = 30,       # fuel consumption in city
+  highway = 40,    # fuel consumption in highway
+  combined = 33)   # fuel consumption combined (city-and-hwy)
+  # assing class
+class(mazda3) <- "car"
+
+mazda3
+```
+
+```{r}
+  # add function to print() family
+print.car <- function(x) {
+  cat("Car\n")
+  cat(sprintf('name: %s\n', x$name))
+  cat(sprintf('make: %s\n', x$make))
+  cat(sprintf('year: %s\n', x$year))
+  invisible(x)
+}
+
+mazda3
+```
+
+```{r}
+  # calculate travel miles
+miles <- 
+  function(car, fuel = 1, mpg = 'city') {
+    stopifnot(class(car) == 'car')
+    switch(mpg,
+           'city' = car$city * fuel,
+           'highway' = car$highway * fuel,
+           'combined' = car$combined * fuel,
+           car$city * fuel)
+  }
+
+miles(mazda3, fuel = 4, 'city')
+miles(mazda3, fuel = 4, 'highway')
+miles(mazda3, fuel = 4, 'combined')
+```
+
+```{r}
+  # format travel miles
+get_distance <- 
+  function(car, fuel = 1, mpg = 'city') {
+    distance <- miles(car, fuel = fuel, mpg = mpg) 
+    cat(sprintf('A %s can travel %s miles\n',
+                car$name, distance))
+    cat(sprintf('with %s gallons of gas\n', fuel))
+    cat(sprintf('using %s consumption', mpg))
+  }
+
+get_distance(mazda3, 4, 'city')
+```
+
+<br>
+
+## 4.1.6 Example: Coffee Prices
+```{r}
+prices <- c(
+  'americano' = 2, 
+  'latte' = 2.75, 
+  'mocha' = 3.45, 
+  'capuccino' = 3.25)
+
+class(prices); mode(prices)
+
+
+print(prices)
+```
+
+```{r}
+for (p in seq_along(prices)) {
+  print(prices[p])
+}
+
+for (p in seq_along(prices)) {
+  print(paste0(names(prices)[p], ' has price of $', prices[p]))
+}
+
+for (p in seq_along(prices)) {
+  print(sprintf('%s has price of $%s', names(prices)[p], prices[p]))
+}
+```
+
+```{r}
+  # print without quote
+for (p in seq_along(prices)) {
+  noquote(sprintf('%s has price of $%s', names(prices)[p], prices[p]))
+}
+
+for (p in seq_along(prices)) {
+  print(sprintf('%s has price of $%s', names(prices)[p], prices[p]), quote = FALSE)
+}
+
+for (p in seq_along(prices)) {
+  cat(sprintf('%s has price of $%s\n', names(prices)[p], prices[p]))
+}
+```
+
