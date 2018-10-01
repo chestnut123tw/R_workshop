@@ -1,6 +1,6 @@
 ---
 title: "4. C-style Formatting"
-date: "`r Sys.Date()`"
+date: "2018-09-25"
 output:
   rmdformats::html_docco:
     highlight: kate

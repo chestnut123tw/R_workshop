@@ -1,6 +1,6 @@
 ---
 title: "3.Formatting Text and Numbers"
-date: "`r Sys.Date()`"
+date: "2018-09-11"
 output:
   rmdformats::html_docco:
     highlight: kate
