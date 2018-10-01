@@ -6,3 +6,5 @@
 [2. Character Strings in R](https://chestnut123tw.github.io/R_workshop/html/R_workshop_2_character_string.html)
 
 [3. Formatting Text and Numbers](https://chestnut123tw.github.io/R_workshop/html/R_workshop_3_Formatting_Text_and_Numbers.html)
+
+[4. C-style Formatting](https://chestnut123tw.github.io/R_workshop/html/R_workshop_4_C-style_Formatting.html)
