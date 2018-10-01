@@ -8,3 +8,5 @@
 [3. Formatting Text and Numbers](https://chestnut123tw.github.io/R_workshop/html/R_workshop_3_Formatting_Text_and_Numbers.html)
 
 [4. C-style Formatting](https://chestnut123tw.github.io/R_workshop/html/R_workshop_4_C-style_Formatting.html)
+
+[5. Input and Output](https://chestnut123tw.github.io/R_workshop/html/R_workshop_5_Input_and_Output.html)
