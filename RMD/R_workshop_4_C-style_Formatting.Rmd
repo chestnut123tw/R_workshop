@@ -1,5 +1,5 @@
 ---
-title: "4. C-style Formatting"
+title: "4.C-style Formatting"
 date: "2018-09-25"
 output:
   rmdformats::html_docco:
